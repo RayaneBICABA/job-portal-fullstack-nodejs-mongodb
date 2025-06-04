@@ -84,6 +84,24 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-exports.getUserProfile = async (req, res) => {};
+exports.getUserProfile = async (req, res) => {
+  try {
+    // Get the user ID from the JWT payload (req.user is set by auth middleware)
+    const user = await User.findById(req.user.userId).select('-password'); // Exclude password
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    res.json({
+      msg: 'User profile fetched successfully',
+      user
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
 
 exports.updateUserProfile = async (req, res) => {};
