@@ -44,12 +44,44 @@ exports.registerUser = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
 exports.loginUser = async (req, res) => {
+  //Destructuring
   const { email, password } = req.body;
+
+  try {
+    //Check if email exist in the database
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ msg: "Invalid email or password" });
+    }
+
+    //If the email exist, find the associated password and compare it to the user input
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Invalid email or password" });
+    }
+
+    //Generate JWT
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      "ryko_jwt_secret",
+      { expiresIn: "1d" }
+    );
+
+    res.json({
+      msg: "Login successful",
+      token,
+      user: { id: user._id, name: user.name, role: user.role },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
 };
 
 exports.getUserProfile = async (req, res) => {};
