@@ -34,3 +34,5 @@ const applicationSchema = new mongoose.Schema({
         required: [true,"The date is required"]
     }
 });
+
+module.exports = mongoose.model("Application",applicationSchema);
