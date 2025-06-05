@@ -87,21 +87,52 @@ exports.loginUser = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
   try {
     // Get the user ID from the JWT payload (req.user is set by auth middleware)
-    const user = await User.findById(req.user.userId).select('-password'); // Exclude password
+    const user = await User.findById(req.user.userId).select("-password"); // Exclude password
 
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     res.json({
-      msg: 'User profile fetched successfully',
-      user
+      msg: "User profile fetched successfully",
+      user,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const user = await User.findById(req.user.userId);
 
-exports.updateUserProfile = async (req, res) => {};
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    // Update fields only if new values are provided
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    res.json({
+      msg: "User profile updated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
