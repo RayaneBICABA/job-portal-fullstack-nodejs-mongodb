@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 const applicationSchema = new mongoose.Schema({
-  canditate: {
+  candidate: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Canditate",
-    required: [true, "The candidate is reuqired"],
+    ref: "User",
+    required: [true, "The candidate is required"],
   },
 
   job: {
